@@ -1,0 +1,217 @@
+openapi: 3.0.0
+info:
+  title: Yoga ve Meditasyon Planlayıcı API
+  description: |
+    Bu API, kullanıcıların yoga ve meditasyon oturumlarını planlamalarına, poz ve teknikleri yönetmelerine, ilerlemelerini takip etmelerine ve günlük hatırlatıcılar ayarlamalarına olanak tanır.
+  version: 1.0.0
+servers:
+  - url: https://api.ornekdomein.com/v1
+    description: Üretim Sunucusu
+tags:
+  - name: Kullanıcı
+    description: Kullanıcı hesap işlemleri
+  - name: Oturum
+    description: Yoga ve meditasyon oturumlarıyla ilgili işlemler
+  - name: Kütüphane
+    description: Poz ve teknik kütüphanesi işlemleri
+  - name: İlerleme
+    description: Kullanıcı ilerleme takibi işlemleri
+  - name: Hatırlatıcı
+    description: Günlük hatırlatıcı işlemleri
+paths:
+  /users:
+    post:
+      tags:
+        - Kullanıcı
+      summary: Yeni kullanıcı oluştur
+      description: Yeni bir kullanıcı hesabı oluşturur.
+      requestBody:
+        description: Oluşturulacak kullanıcı bilgileri
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: Kullanıcı başarıyla oluşturuldu
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Geçersiz istek
+  /sessions:
+    post:
+      tags:
+        - Oturum
+      summary: Yeni oturum planla
+      description: Yeni bir yoga veya meditasyon oturumu planlar.
+      requestBody:
+        description: Planlanacak oturum bilgileri
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Session'
+      responses:
+        '201':
+          description: Oturum başarıyla planlandı
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '400':
+          description: Geçersiz istek
+    get:
+      tags:
+        - Oturum
+      summary: Planlanmış oturumları listele
+      description: Kullanıcının planlanmış oturumlarını listeler.
+      responses:
+        '200':
+          description: Oturum listesi başarıyla alındı
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Session'
+  /library/poses:
+    get:
+      tags:
+        - Kütüphane
+      summary: Pozları listele
+      description: Mevcut yoga pozlarını listeler.
+      responses:
+        '200':
+          description: Poz listesi başarıyla alındı
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pose'
+  /progress:
+    get:
+      tags:
+        - İlerleme
+      summary: İlerlemeyi görüntüle
+      description: Kullanıcının ilerlemesini görüntüler.
+      responses:
+        '200':
+          description: İlerleme bilgisi başarıyla alındı
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Progress'
+  /reminders:
+    post:
+      tags:
+        - Hatırlatıcı
+      summary: Yeni hatırlatıcı ayarla
+      description: Yeni bir günlük hatırlatıcı ayarlar.
+      requestBody:
+        description: Ayarlanacak hatırlatıcı bilgileri
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+      responses:
+        '201':
+          description: Hatırlatıcı başarıyla ayarlandı
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+        '400':
+          description: Geçersiz istek
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          example: kullaniciadi
+        email:
+          type: string
+          format: email
+          example: kullanici@ornek.com
+        password:
+          type: string
+          format: password
+          example: sifre123
+    Session:
+      type: object
+      required:
+        - type
+        - date
+        - duration
+      properties:
+        type:
+          type: string
+          enum: [yoga, meditasyon]
+          example: yoga
+        date:
+          type: string
+          format: date-time
+          example: '2024-12-13T11:23:05Z'
+        duration:
+          type: integer
+          format: int32
+          description: Oturum süresi dakikadır.
+          example: 60
+        poseIds:
+          type: array
+          items:
+            type: string
+          description: Oturumda yer alacak pozların kimlikleri.
+    Pose:
+      type: object
+      required:
+        - id
+        - name
+        - description
+      properties:
+        id:
+          type: string
+          example: 'pose1'
+        name:
+          type: string
+          example: 'Ağaç Pozu'
+        description:
+          type: string
+          example: 'Dengeyi geliştiren bir duruş.'
+    Progress:
+      type: object
+      properties:
+        totalSessions:
+          type: integer
+          example: 50
+        totalDuration:
+          type: integer
+          description: Toplam süre dakikadır.
+          example: 3000
+        achievements:
+          type: array
+          items:
+            type: string
+          example: ['10 gün ardışık pratik', 'İlk meditasyon oturumu']
+    Reminder:
+      type: object
+      required:
+        - time
+      properties:
+        time:
+          type: string
+          format: time
+          example: '08:00:00'
+        message:
+          type: string
+          example: 'Günlük yoga pratiğinizi unutmayın!'
